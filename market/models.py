@@ -23,7 +23,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     """Модель пользователя."""
-    username = None
+    username = models.CharField(max_length=256, unique=True)
     last_name = models.CharField('Фамилия', max_length=256)
     first_name = models.CharField('Имя', max_length=256)
     patronymic = models.CharField(
@@ -31,7 +31,6 @@ class CustomUser(AbstractUser):
         max_length=256,
         blank=True,
         null=True
-
     )
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=150)
@@ -42,15 +41,15 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(
         'Номер телефона',
         max_length=17,
-        unique=True,
+        # unique=True,
         validators=[phone_validator,]
     )
 
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['last_name', 'first_name',]
+    # USERNAME_FIELD = 'email'
+    # REQUIRED_FIELDS = ['last_name', 'first_name',]
 
-    objects = CustomUserManager()
+    # objects = CustomUserManager()
 
     def __str__(self):
         return (f'{self.first_name} {self.last_name}')
@@ -80,10 +79,8 @@ class Order(models.Model):
         related_name='orders',
         verbose_name='Пользователь',
     )
-    goods = models.ForeignKey(
+    goods = models.ManyToManyField(
         Goods,
-        on_delete=models.CASCADE,
-        related_name='orders',
         verbose_name='Товары',
     )
     pub_date = models.DateTimeField(
@@ -91,3 +88,5 @@ class Order(models.Model):
         auto_now_add=True,
     )
     status = models.CharField(max_length=150, default='created')
+
+
