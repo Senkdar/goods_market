@@ -41,12 +41,21 @@ class GoodsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class GetOrderSerializer(serializers.ModelSerializer):
+    """Сериализатор для просмотра созданных заказов."""
+    goods = GoodsSerializer(many=True, read_only=True)
+
+    
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
 class OrderSerializer(serializers.ModelSerializer):
     """Сериализатор для созданных заказов."""
     status = serializers.StringRelatedField(read_only=True)
     user = serializers.StringRelatedField(source = 'user.email', read_only=True)
     goods = serializers.PrimaryKeyRelatedField(
-        # source = 'goods.id',
         many=True,
         queryset = Goods.objects.all()
     )
@@ -60,7 +69,7 @@ class OrderSerializer(serializers.ModelSerializer):
         goods = validated_data.pop('goods')
         order = Order.objects.create(**validated_data)
 
-        # for item in goods:
-        #     order.goods.add(item)
+        for item in goods:
+            order.goods.add(item)
         return order
         

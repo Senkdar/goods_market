@@ -1,10 +1,11 @@
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from .models import CustomUser, Goods, Order
 from .serializers import (
+    GetOrderSerializer,
     GoodsSerializer,
     OrderSerializer,
     UserSerializer,
@@ -42,12 +43,17 @@ class OrderViewSet(ModelViewSet):
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user).order_by('-id')
 
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return GetOrderSerializer
+        return OrderSerializer
+
     def create(self, request, *args, **kwargs):
         user = self.request.user
-        goods = Goods.objects.filter(user=user)
+        # goods = Goods.objects.filter(user=user)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=user, goods=goods)
+        serializer.save(user=user)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED
