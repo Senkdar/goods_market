@@ -82,22 +82,9 @@ class Order(models.Model):
     goods = models.ManyToManyField(
         Goods,
         verbose_name='Товары',
-        through='OrderGoods',
     )
     pub_date = models.DateTimeField(
         'дата публикации',
         auto_now_add=True,
     )
     status = models.CharField(max_length=150, default='created')
-
-
-class OrderGoods(models.Model):
-    """Промежуточная модель для связи товаров и заказов."""
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE
-    )
-    goods = models.ForeignKey(
-        Goods,
-        on_delete=models.CASCADE
-    )
