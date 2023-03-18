@@ -1,11 +1,6 @@
 from rest_framework import serializers
-import logging
 from .models import CustomUser, Goods, Order
 
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователей."""
@@ -58,14 +53,19 @@ class GetOrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class GoodsPKfield(serializers.PrimaryKeyRelatedField):
+
+    def get_queryset(self):
+        user = self.context.get('request').user
+        queryset = Goods.objects.filter(user=user)
+        return queryset
+
+
 class OrderSerializer(serializers.ModelSerializer):
     """Сериализатор для созданных заказов."""
     status = serializers.StringRelatedField(read_only=True)
     user = serializers.StringRelatedField(source='user.email', read_only=True)
-    goods = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Goods.objects.all()
-    )
+    goods = GoodsPKfield(many=True)
 
     class Meta:
         model = Order
