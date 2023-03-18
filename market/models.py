@@ -32,8 +32,8 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True
     )
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=150)
+    email = models.EmailField('Имя пользователя', unique=True)
+    password = models.CharField('Пароль', max_length=150)
     phone_validator = RegexValidator(
             regex=r'^8-\d{3}-\d{3}-\d{2}-\d{2}$',
             message="Номер телефона должен быть в формате: '8-xxx-xxx-xx-xx'"
@@ -41,7 +41,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(
         'Номер телефона',
         max_length=17,
-        # unique=True,
+        unique=True,
         validators=[phone_validator,]
     )
 
@@ -52,7 +52,7 @@ class CustomUser(AbstractUser):
     # objects = CustomUserManager()
 
     def __str__(self):
-        return (f'{self.first_name} {self.last_name}')
+        return (self.username)
 
     class Meta:
         verbose_name = 'Пользователь'
