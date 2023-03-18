@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, SAFE_METHODS
 from rest_framework.response import Response
@@ -11,6 +12,10 @@ from .serializers import (
     UserSerializer,
 )
 
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
 class UserViewSet(ModelViewSet):
 
@@ -27,6 +32,7 @@ class GoodsViewSet(ModelViewSet):
         return Goods.objects.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
+        logging.info('goodsasa')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=self.request.user)
