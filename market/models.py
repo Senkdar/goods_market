@@ -88,3 +88,56 @@ class Order(models.Model):
         auto_now_add=True,
     )
     status = models.CharField(max_length=150, default='created')
+    processed_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        related_name='processed_orders',
+        verbose_name='обработал заказ',
+        blank=True,
+        null=True,
+    )
+    processed_at = models.DateTimeField(
+        'дата обработки заказа',
+        auto_now_add=True,
+        blank=True,
+        null=True,
+    )
+    comment = models.TextField(
+        'комментарий',
+        blank=True,
+        null=True,
+    )
+
+
+class Processed_order(models.Model):
+    """Модель для обработанных заказов"""
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+
+    STATUS_CHOICES = [
+        (APPROVED, 'approved'),
+        (REJECTED, 'rejected'),
+    ]
+    admin = models.ForeignKey(
+        CustomUser,
+        verbose_name=('Администратор'),
+        on_delete=models.SET_NULL,
+        related_name='processed_order',
+        null=True
+    )
+    order = models.OneToOneField(
+        Order,
+        verbose_name=('Заказ'),
+        on_delete=models.CASCADE,
+        related_name='processed_order'
+    )
+    status = models.CharField(
+        'Статус',
+        max_length=50,
+        choices=STATUS_CHOICES,
+    )
+    date = models.DateTimeField(
+        'Дата',
+        auto_now_add=True,
+    )
+    comment = models.TextField('Комментарий')
