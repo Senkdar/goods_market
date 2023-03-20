@@ -23,7 +23,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     """Модель пользователя."""
-    username = None
+    username = models.CharField(max_length=256, unique=True)
     last_name = models.CharField('Фамилия', max_length=256)
     first_name = models.CharField('Имя', max_length=256)
     patronymic = models.CharField(
@@ -31,10 +31,9 @@ class CustomUser(AbstractUser):
         max_length=256,
         blank=True,
         null=True
-
     )
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=150)
+    email = models.EmailField('Имя пользователя', unique=True)
+    password = models.CharField('Пароль', max_length=150)
     phone_validator = RegexValidator(
             regex=r'^8-\d{3}-\d{3}-\d{2}-\d{2}$',
             message="Номер телефона должен быть в формате: '8-xxx-xxx-xx-xx'"
@@ -47,13 +46,13 @@ class CustomUser(AbstractUser):
     )
 
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['last_name', 'first_name',]
+    # USERNAME_FIELD = 'email'
+    # REQUIRED_FIELDS = ['last_name', 'first_name',]
 
-    objects = CustomUserManager()
+    # objects = CustomUserManager()
 
     def __str__(self):
-        return (f'{self.first_name} {self.last_name}')
+        return (self.username)
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -80,10 +79,8 @@ class Order(models.Model):
         related_name='orders',
         verbose_name='Пользователь',
     )
-    goods = models.ForeignKey(
+    goods = models.ManyToManyField(
         Goods,
-        on_delete=models.CASCADE,
-        related_name='orders',
         verbose_name='Товары',
     )
     pub_date = models.DateTimeField(
@@ -91,3 +88,56 @@ class Order(models.Model):
         auto_now_add=True,
     )
     status = models.CharField(max_length=150, default='created')
+    processed_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        related_name='processed_orders',
+        verbose_name='обработал заказ',
+        blank=True,
+        null=True,
+    )
+    processed_at = models.DateTimeField(
+        'дата обработки заказа',
+        auto_now_add=True,
+        blank=True,
+        null=True,
+    )
+    comment = models.TextField(
+        'комментарий',
+        blank=True,
+        null=True,
+    )
+
+
+class Processed_order(models.Model):
+    """Модель для обработанных заказов"""
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+
+    STATUS_CHOICES = [
+        (APPROVED, 'approved'),
+        (REJECTED, 'rejected'),
+    ]
+    admin = models.ForeignKey(
+        CustomUser,
+        verbose_name=('Администратор'),
+        on_delete=models.SET_NULL,
+        related_name='processed_order',
+        null=True
+    )
+    order = models.OneToOneField(
+        Order,
+        verbose_name=('Заказ'),
+        on_delete=models.CASCADE,
+        related_name='processed_order'
+    )
+    status = models.CharField(
+        'Статус',
+        max_length=50,
+        choices=STATUS_CHOICES,
+    )
+    date = models.DateTimeField(
+        'Дата',
+        auto_now_add=True,
+    )
+    comment = models.TextField('Комментарий')
