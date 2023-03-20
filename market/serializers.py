@@ -1,12 +1,5 @@
 from rest_framework import serializers
 from .models import CustomUser, Goods, Order
-import logging
-logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-
-NORMAL_DATE = serializers.DateTimeField(format="%d.%m.%Y %H:%M:%S")
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -55,15 +48,15 @@ class GetOrderSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра заказов."""
     goods = GoodsSerializer(many=True, read_only=True)
     user = serializers.StringRelatedField(
-        source='user.username',
+        source='user.email',
         read_only=True
     )
     processed_by = serializers.StringRelatedField(
         source='user.username',
         read_only=True
     )
-    pub_date = serializers.DateTimeField(format="%d.%m.%Y %H:%M:%S")
-    processed_at = serializers.DateTimeField(format="%d.%m.%Y %H:%M:%S")
+    pub_date = serializers.DateTimeField(format='%d.%m.%Y %H:%M:%S')
+    processed_at = serializers.DateTimeField(format='%d.%m.%Y %H:%M:%S')
 
     class Meta:
         model = Order
@@ -72,26 +65,15 @@ class GetOrderSerializer(serializers.ModelSerializer):
             'status', 'processed_by', 'processed_at', 'comment')
 
     def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        status = rep['status']
+        order = super().to_representation(instance)
+        status = order['status']
         if status == 'created':
-            rep.pop('processed_at')
-            rep.pop('processed_by')
-            rep.pop('comment')
+            order.pop('processed_at')
+            order.pop('processed_by')
+            order.pop('comment')
         if status == 'approved':
-            rep.pop('comment')
-        return rep
-
-
-class SmallOrderSerializer(serializers.ModelSerializer):
-    """Сериализатор для просмотра созданных заказов."""
-    goods = GoodsSerializer(many=True, read_only=True)
-    user = serializers.StringRelatedField(source='user.email', read_only=True)
-    status = serializers.StringRelatedField(read_only=True)
-
-    class Meta:
-        model = Order
-        fields = ('id', 'goods', 'user', 'status', 'pub_date')
+            order.pop('comment')
+        return order
 
 
 class GoodsPKfield(serializers.PrimaryKeyRelatedField):
@@ -113,21 +95,20 @@ class GoodsPKfield(serializers.PrimaryKeyRelatedField):
             raise serializers.ValidationError(f'У Вас нет товара с id {data}')
 
 
-class OrderSerializer(serializers.ModelSerializer):
+class CreateOrderSerializer(serializers.ModelSerializer):
     """Сериализатор для создания заказов пользователем."""
-    logging.info('goodsasa')
     status = serializers.StringRelatedField(read_only=True)
     user = serializers.StringRelatedField(source='user.email', read_only=True)
     goods = GoodsPKfield(many=True)
 
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return SmallOrderSerializer(instance, context=context).data
-
     class Meta:
         model = Order
         fields = ('id', 'goods', 'user', 'status', 'pub_date')
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return GetOrderSerializer(instance, context=context).data
 
     def create(self, validated_data):
         goods = validated_data.pop('goods')
@@ -138,13 +119,22 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
+    """Сериализатор для обновления заказа администратором."""
     ORDER_STATUSES = (
         ('created', 'Создан'),
         ('rejected', 'Отклонен'),
         ('approved', 'Одобрен'),
     )
-    processed_by = serializers.StringRelatedField(source='user.email', read_only=True, default=serializers.CurrentUserDefault())
+    processed_by = serializers.StringRelatedField(
+        source='user.username',
+        read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
     status = serializers.ChoiceField(choices=ORDER_STATUSES)
+    processed_at = serializers.DateTimeField(
+        format='%d.%m.%Y %H:%M:%S',
+        read_only=True
+    )
 
     class Meta:
         model = Order
