@@ -1,24 +1,6 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
-
-
-class CustomUserManager(BaseUserManager):
-    """Менеджер для модели пользователя."""
-    def create_user(self, email, password, **extra_fields):
-        """Создание пользователя"""
-        if not email:
-            raise ValueError('The Email field must be set')
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        """Создание суперпользователя"""
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractUser):
@@ -45,12 +27,6 @@ class CustomUser(AbstractUser):
         validators=[phone_validator,]
     )
 
-
-    # USERNAME_FIELD = 'email'
-    # REQUIRED_FIELDS = ['last_name', 'first_name',]
-
-    # objects = CustomUserManager()
-
     def __str__(self):
         return (self.username)
 
@@ -69,6 +45,13 @@ class Goods(models.Model):
     name = models.CharField('Название', max_length=150)
     link = models.URLField('Ссылка')
     comment = models.CharField('комментарий', max_length=300)
+
+    def __str__(self):
+        return (self.name)
+
+    class Meta:
+        verbose_name = 'Товар'
+        verbose_name_plural = 'Товары'
 
 
 class Order(models.Model):
@@ -103,41 +86,11 @@ class Order(models.Model):
         null=True,
     )
     comment = models.TextField(
-        'комментарий',
+        'Причина',
         blank=True,
         null=True,
     )
 
-
-class Processed_order(models.Model):
-    """Модель для обработанных заказов"""
-    APPROVED = 'approved'
-    REJECTED = 'rejected'
-
-    STATUS_CHOICES = [
-        (APPROVED, 'approved'),
-        (REJECTED, 'rejected'),
-    ]
-    admin = models.ForeignKey(
-        CustomUser,
-        verbose_name=('Администратор'),
-        on_delete=models.SET_NULL,
-        related_name='processed_order',
-        null=True
-    )
-    order = models.OneToOneField(
-        Order,
-        verbose_name=('Заказ'),
-        on_delete=models.CASCADE,
-        related_name='processed_order'
-    )
-    status = models.CharField(
-        'Статус',
-        max_length=50,
-        choices=STATUS_CHOICES,
-    )
-    date = models.DateTimeField(
-        'Дата',
-        auto_now_add=True,
-    )
-    comment = models.TextField('Комментарий')
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
