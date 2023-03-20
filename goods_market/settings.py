@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'market.apps.MarketConfig',
     'rest_framework.authtoken',
     'djoser',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -121,7 +122,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DJOSER = {
     'SERIALIZERS': {
-        'user_create': 'market.serializers.UserSerializer'
+        'user_create': 'market.serializers.MyUserSerializer'
+    },
+
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.IsAuthenticated', 'market.permissions.AuthorOrAdminPermission']
     },
 }
 

@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
         blank=True,
         null=True
     )
-    email = models.EmailField('Имя пользователя', unique=True)
+    email = models.EmailField('Email', unique=True)
     password = models.CharField('Пароль', max_length=150)
     phone_validator = RegexValidator(
             regex=r'^8-\d{3}-\d{3}-\d{2}-\d{2}$',

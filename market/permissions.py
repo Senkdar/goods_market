@@ -4,7 +4,7 @@ from rest_framework import permissions
 class AuthorOrAdminPermission(permissions.BasePermission):
     """Ограничение на просмотр объектов,
     если пользователь не является автором,
-    а также на обновление контента.
+    а также на изменение контента.
     """
     def has_permission(self, request, view):
         return (
@@ -15,7 +15,10 @@ class AuthorOrAdminPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in ['PUT', 'PATCH']:
             return request.user.is_staff
-        return (
-            obj.user == request.user or
-            request.user.is_staff
-        )
+        if hasattr(obj, 'user'):
+            return (
+                obj.user == request.user or
+                request.user.is_staff
+            )
+        else:
+            return obj == request.user

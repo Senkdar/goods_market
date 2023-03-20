@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import CustomUser, Goods, Order
 
 
-class UserSerializer(serializers.ModelSerializer):
+class MyUserSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователей."""
 
     class Meta:
