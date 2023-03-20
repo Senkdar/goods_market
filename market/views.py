@@ -1,25 +1,17 @@
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .models import CustomUser, Goods, Order
+from .models import Goods, Order
 from .serializers import (
     GetOrderSerializer,
     GoodsSerializer,
     CreateOrderSerializer,
-    MyUserSerializer,
     UpdateOrderSerializer,
 )
 from .permissions import AuthorOrAdminPermission
-
-
-# class UserViewSet(ModelViewSet):
-#     """Вьюсет для пользователей."""
-#     serializer_class = MyUserSerializer
-#     queryset = CustomUser.objects.all()
-#     permission_classes = (IsAdminUser,)
 
 
 class GoodsViewSet(ModelViewSet):
