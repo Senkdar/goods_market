@@ -7,3 +7,4 @@ psycopg2-binary==2.9.5
 pyflakes==3.0.1
 PyJWT==2.6.0
 python-dotenv==1.0.0
+drf-yasg==1.21.5
