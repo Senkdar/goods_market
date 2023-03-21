@@ -26,7 +26,6 @@ DB_PORT=5432
 3. Выполнить команды:
 ```
 docker-compose up -d
-docker-compose exec backend python manage.py makemigrations
 docker-compose exec backend python manage.py migrate
 ```
 
