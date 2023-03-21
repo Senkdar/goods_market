@@ -9,8 +9,6 @@ services:
       - ./.env
   web:
     build: .
-    # command: python manage.py makemigrations market
-    # command: python manage.py migrate
     restart: always
     ports:
      - "8000:8000"
