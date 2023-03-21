@@ -7,7 +7,7 @@ services:
       - /var/lib/postgresql/data/
     env_file:
       - ./.env
-  web:
+  backend:
     build: .
     restart: always
     ports:
