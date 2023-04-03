@@ -8,7 +8,6 @@ router = DefaultRouter()
 router.register('goods', GoodsViewSet, basename='goods')
 router.register('orders', OrderViewSet, basename='orders')
 
-
 urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
